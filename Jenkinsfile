@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "iamsnaaz/cicd-pipeline-demo"
-        TAG = "latest"
+        TAG = "${BUILD_NUMBER}"   // ✅ dynamic version
     }
 
     stages {
@@ -47,12 +47,17 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh '''
-                kubectl set image deployment/cicd-app app=$IMAGE_NAME:$TAG --record || \
+                sh """
+                # Apply manifests first
                 kubectl apply -f k8s/deployment.yaml
-        
                 kubectl apply -f k8s/service.yaml
-                '''
+
+                # Update image with new version
+                kubectl set image deployment/cicd-app app=$IMAGE_NAME:$TAG
+
+                # Wait for rollout
+                kubectl rollout status deployment/cicd-app
+                """
             }
         }
     }
