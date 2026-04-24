@@ -45,12 +45,13 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy to Kubernetes') {
             steps {
                 sh '''
-                docker stop poc-container || true
-                docker rm poc-container || true
-                docker run -d -p 8081:8080 --name poc-container $IMAGE_NAME:$TAG
+                kubectl set image deployment/cicd-app app=$IMAGE_NAME:$TAG --record || \
+                kubectl apply -f k8s/deployment.yaml
+        
+                kubectl apply -f k8s/service.yaml
                 '''
             }
         }
