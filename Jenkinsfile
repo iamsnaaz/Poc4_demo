@@ -48,14 +48,13 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh """
-                # Apply manifests first
+                export KUBECONFIG=/var/lib/jenkins/.kube/config
+        
                 kubectl apply -f k8s/deployment.yaml
                 kubectl apply -f k8s/service.yaml
-
-                # Update image with new version
+        
                 kubectl set image deployment/cicd-app app=$IMAGE_NAME:$TAG
-
-                # Wait for rollout
+        
                 kubectl rollout status deployment/cicd-app
                 """
             }
