@@ -3,12 +3,18 @@ package com.example;
 import com.sun.net.httpserver.HttpServer;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class App {
+
+    private static final AtomicInteger requestCounter = new AtomicInteger(0);
+
     public static void main(String[] args) throws Exception {
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
 
         server.createContext("/", exchange -> {
+            requestCounter.incrementAndGet();
+
             String response = """
                 <html>
                 <head>
@@ -34,6 +40,7 @@ public class App {
 
             exchange.getResponseHeaders().add("Content-Type", "text/html");
             exchange.sendResponseHeaders(200, response.getBytes().length);
+
             OutputStream os = exchange.getResponseBody();
             os.write(response.getBytes());
             os.close();
@@ -46,10 +53,11 @@ public class App {
                     "cicd_app_up 1\n" +
                     "# HELP cicd_app_requests_total Total requests served\n" +
                     "# TYPE cicd_app_requests_total counter\n" +
-                    "cicd_app_requests_total 1\n";
+                    "cicd_app_requests_total " + requestCounter.get() + "\n";
 
             exchange.getResponseHeaders().add("Content-Type", "text/plain; version=0.0.4");
             exchange.sendResponseHeaders(200, response.getBytes().length);
+
             OutputStream os = exchange.getResponseBody();
             os.write(response.getBytes());
             os.close();
