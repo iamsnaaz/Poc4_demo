@@ -20,30 +20,39 @@ public class App {
                             background-color: #f4f4f4;
                             margin-top: 50px;
                         }
-                        h1 {
-                            color: #2c3e50;
-                        }
-                        p {
-                            font-size: 18px;
-                        }
+                        h1 { color: #2c3e50; }
+                        p { font-size: 18px; }
                     </style>
                 </head>
                 <body>
                     <h1>🚀 CI/CD POC Successful!</h1>
-                    <p>Java app deployed on EKS</p>
-                    <p>Using Terraform + GitHub Actions</p>
+                    <p>Java app deployed on Kubernetes</p>
+                    <p>Using Jenkins + Docker + Kubernetes + Prometheus</p>
                 </body>
                 </html>
             """;
 
             exchange.getResponseHeaders().add("Content-Type", "text/html");
             exchange.sendResponseHeaders(200, response.getBytes().length);
-
             OutputStream os = exchange.getResponseBody();
             os.write(response.getBytes());
             os.close();
+        });
 
-            System.out.println("Served HTML page");
+        server.createContext("/metrics", exchange -> {
+            String response =
+                    "# HELP cicd_app_up Application health status\n" +
+                    "# TYPE cicd_app_up gauge\n" +
+                    "cicd_app_up 1\n" +
+                    "# HELP cicd_app_requests_total Total requests served\n" +
+                    "# TYPE cicd_app_requests_total counter\n" +
+                    "cicd_app_requests_total 1\n";
+
+            exchange.getResponseHeaders().add("Content-Type", "text/plain; version=0.0.4");
+            exchange.sendResponseHeaders(200, response.getBytes().length);
+            OutputStream os = exchange.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
         });
 
         server.start();
