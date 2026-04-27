@@ -98,43 +98,21 @@ pipeline {
         }
     }
 
-    post {
-        success {
-            emailext(
-                to: 'sadiyanaazpoc@gmail.com',
-                subject: "SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: """
-Build SUCCESS 🚀
+post {
+    always {
+        emailext(
+            to: 'sadiyanaazpoc@gmail.com',
+            recipientProviders: [[$class: 'RequesterRecipientProvider']],
+            subject: "Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            body: """
+Build Status: ${currentBuild.currentResult}
 
 Job: ${env.JOB_NAME}
 Build Number: ${env.BUILD_NUMBER}
-Docker Image: ${env.IMAGE_NAME}:${env.TAG}
-Build URL: ${env.BUILD_URL}
-
-Deployment to Kubernetes completed successfully.
+URL: ${env.BUILD_URL}
 """,
-                attachLog: true,
-                attachmentsPattern: 'trivy-*.txt'
-            )
-        }
-
-        failure {
-            emailext(
-                to: 'sadiyanaazpoc@gmail.com',
-                subject: "FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: """
-Build FAILED ❌
-
-Job: ${env.JOB_NAME}
-Build Number: ${env.BUILD_NUMBER}
-Docker Image: ${env.IMAGE_NAME}:${env.TAG}
-Build URL: ${env.BUILD_URL}
-
-Please check the attached Jenkins console log.
-""",
-                attachLog: true,
-                attachmentsPattern: 'trivy-*.txt'
-            )
-        }
+            attachLog: true,
+            attachmentsPattern: 'trivy-*.txt'
+        )
     }
 }
