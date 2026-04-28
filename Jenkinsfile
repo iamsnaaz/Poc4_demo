@@ -97,39 +97,29 @@ pipeline {
             }
         }
     }
-
 post {
-    success {
-        mail(
+    always {
+        emailext(
             to: 'sadiyanaazpoc@gmail.com,sadiyanaaz4255@gmail.com',
-            subject: "SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            subject: "${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            mimeType: 'text/html',
             body: """
-Build SUCCESS 🚀
+<html>
+<body>
+<h2>Build ${currentBuild.currentResult}</h2>
 
-Job: ${env.JOB_NAME}
-Build Number: ${env.BUILD_NUMBER}
-Docker Image: ${env.IMAGE_NAME}:${env.TAG}
-Build URL: ${env.BUILD_URL}
+<table border="1" cellpadding="8" cellspacing="0">
+<tr><td><b>Job</b></td><td>${env.JOB_NAME}</td></tr>
+<tr><td><b>Build Number</b></td><td>${env.BUILD_NUMBER}</td></tr>
+<tr><td><b>Docker Image</b></td><td>${env.IMAGE_NAME}:${env.TAG}</td></tr>
+<tr><td><b>Build URL</b></td><td><a href="${env.BUILD_URL}">${env.BUILD_URL}</a></td></tr>
+</table>
 
-Deployment to Kubernetes completed successfully.
-"""
-        )
-    }
-
-    failure {
-        mail(
-            to: 'sadiyanaazpoc@gmail.com,sadiyanaaz4255@gmail.com',
-            subject: "FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-            body: """
-Build FAILED ❌
-
-Job: ${env.JOB_NAME}
-Build Number: ${env.BUILD_NUMBER}
-Docker Image: ${env.IMAGE_NAME}:${env.TAG}
-Build URL: ${env.BUILD_URL}
-
-Please check Jenkins console output.
-"""
+<p>Trivy scan reports are attached.</p>
+</body>
+</html>
+""",
+            attachmentsPattern: 'trivy-*.txt'
         )
     }
 }
