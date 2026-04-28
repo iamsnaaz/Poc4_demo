@@ -100,21 +100,17 @@ pipeline {
 
 post {
     always {
-        emailext(
+        mail(
             to: 'sadiyanaazpoc@gmail.com',
-            recipientProviders: [[$class: 'RequesterRecipientProvider']],
             subject: "Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
             body: """
 Build Status: ${currentBuild.currentResult}
 
 Job: ${env.JOB_NAME}
 Build Number: ${env.BUILD_NUMBER}
-URL: ${env.BUILD_URL}
-""",
-            attachLog: true,
-            attachmentsPattern: 'trivy-*.txt'
+Docker Image: ${env.IMAGE_NAME}:${env.TAG}
+Build URL: ${env.BUILD_URL}
+"""
         )
     }
 }
-}
-    
