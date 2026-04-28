@@ -99,17 +99,36 @@ pipeline {
     }
 
 post {
-    always {
+    success {
         mail(
-            to: 'sadiyanaazpoc@gmail.com',
-            subject: "Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            to: 'sadiyanaazpoc@gmail.com,sadiyanaaz4255@gmail.com',
+            subject: "SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
             body: """
-Build Status: ${currentBuild.currentResult}
+Build SUCCESS 🚀
 
 Job: ${env.JOB_NAME}
 Build Number: ${env.BUILD_NUMBER}
 Docker Image: ${env.IMAGE_NAME}:${env.TAG}
 Build URL: ${env.BUILD_URL}
+
+Deployment to Kubernetes completed successfully.
+"""
+        )
+    }
+
+    failure {
+        mail(
+            to: 'sadiyanaazpoc@gmail.com,sadiyanaaz4255@gmail.com',
+            subject: "FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            body: """
+Build FAILED ❌
+
+Job: ${env.JOB_NAME}
+Build Number: ${env.BUILD_NUMBER}
+Docker Image: ${env.IMAGE_NAME}:${env.TAG}
+Build URL: ${env.BUILD_URL}
+
+Please check Jenkins console output.
 """
         )
     }
